@@ -4,3 +4,4 @@ node_modules
 *.iml
 yarn.lock
 dist
+.nyc_output
