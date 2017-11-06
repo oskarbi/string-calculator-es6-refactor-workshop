@@ -1,5 +1,5 @@
-import 'should';
-import sc from './string-calculator.js';
+require('should');
+const sc = require('./string-calculator.js');
 
 describe("The string calculator", () => {
   it("Sums numbers separated by comma in a text", () => {

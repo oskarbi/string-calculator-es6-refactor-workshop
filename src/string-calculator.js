@@ -1,4 +1,4 @@
-export default text => {
+module.exports = text => {
   let separators = ["\n"];
   if (text.indexOf("][") !== -1)
     separators = ["\n"].concat(text.substr(3, text.indexOf("\n") - 4).split("]["));

@@ -1,17 +1,15 @@
 {
-  "name": "curso-javascript-es6",
+  "name": "string-calculator-es6-refactor-workshop",
   "version": "1.0.0",
   "main": "index.js",
   "repository": {},
   "license": "MIT",
   "scripts": {
-    "test:watch": "mocha -w --compilers js:babel-register src/**/*-test.js",
-    "test": "mocha --compilers js:babel-register src/**/*-test.js",
+    "test:watch": "mocha -w src/**/*-test.js",
+    "test": "mocha src/**/*-test.js",
     "lint": "eslint src/**/*.js"
   },
   "dependencies": {
-    "babel-preset-env": "^1.6.1",
-    "babel-register": "^6.26.0",
     "eslint": "^4.8.0",
     "mocha": "^3.5.3",
     "ramda": "^0.25.0",
