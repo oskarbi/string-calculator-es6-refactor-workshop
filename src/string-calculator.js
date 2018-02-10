@@ -1,35 +1,28 @@
-const replaceAll = (search, replacement, text) => text.replace(new RegExp(search, "g"), replacement);
-const contains = (token, text) => text.indexOf(token) > -1;
+const {toInt, lessThan, sum} = require('./fp/numbers');
+const {contains, replaceAll, split, escapeRegex} = require('./fp/strings');
+const {pipe, spread} = require('./fp/fns');
+const {map, filter, reduce, peek} = require('./fp/arrays');
 
-const toInt = text => parseInt(text, 10);
-const lessThan = b => a => a < b;
-const sum = (a, b) => a + b;
+const START_OF_HEADER_CHAR = "//";
+const END_OF_HEADER_CHAR = "\n";
+const SEPARATOR_SEPARATOR = "][";
+
+const extractRawSeparators = text => text.substr(3, text.indexOf(END_OF_HEADER_CHAR) - 4);
 
 const extractSeparators = text => {
-  if (contains("][", text))
-    return ["\n"].concat(text.substr(3, text.indexOf("\n") - 4).split("]["));
-  if (text.startsWith("//["))
-    return ["\n", text.substr(3, text.indexOf("]") - 3)];
-  if (text.startsWith("//"))
-    return ["\n", text[2]];
+  if (contains(SEPARATOR_SEPARATOR, text))
+    return ["\n"].concat(extractRawSeparators(text).split(SEPARATOR_SEPARATOR));
+  if (text.startsWith(START_OF_HEADER_CHAR))
+    return ["\n", extractRawSeparators(text)];
   return ["\n"];
 };
 
-const extractText = text => {
-  if (text.startsWith("//["))
-    return text.substr(text.indexOf("\n") + 1);
-  if (text.startsWith("//"))
-    return text.substr(4);
-  return text;
-};
-
-const escapeSeparator = separator => separator
-    .split('')
-    .map(char => !contains(char, ".()[]{}$^-/?*") ? char : `\\${char}`)
-    .join('');
+const extractText = text => text.startsWith(START_OF_HEADER_CHAR)
+    ? text.substr(text.indexOf(END_OF_HEADER_CHAR) + 1)
+    : text;
 
 const normalizeText = ([separators, text]) => separators
-    .map(escapeSeparator)
+    .map(escapeRegex)
     .reduce((result, separator) => replaceAll(separator, ',', result), text);
 
 const checkNegatives = numbers => {
@@ -37,22 +30,6 @@ const checkNegatives = numbers => {
   if (negativeNumbers.length > 0)
     throw new Error(`Negative numbers are not allowed: ${negativeNumbers}`);
 };
-
-const identity = i => i;
-const compose = (a, b) => input => b(a(input));
-const pipe = (...fns) => fns.reduce(compose, identity);
-
-const split = separator => text => text.split(separator);
-const map = mapper => array => array.map(mapper);
-const filter = predicate => array => array.filter(predicate);
-const reduce = (composingFn, neutralValue) => array => array.reduce(composingFn, neutralValue);
-
-const peek = fn => value => {
-  fn(value);
-  return value;
-};
-
-const spread = (...fns) => value => fns.map(fn => fn(value));
 
 module.exports = pipe(
     spread(
