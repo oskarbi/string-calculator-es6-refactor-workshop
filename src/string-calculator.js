@@ -28,9 +28,9 @@ const escapeSeparator = separator => separator
     .map(char => !contains(char, ".()[]{}$^-/?*") ? char : `\\${char}`)
     .join('');
 
-const normalizeText = (separators, normalizedText) => separators
+const normalizeText = text => extractSeparators(text)
     .map(escapeSeparator)
-    .reduce((result, separator) => replaceAll(separator, ',', result), normalizedText);
+    .reduce((result, separator) => replaceAll(separator, ',', result), extractText(text));
 
 const checkNegatives = numbers => {
   const negativeNumbers = numbers.filter(lessThan(0));
@@ -38,26 +38,25 @@ const checkNegatives = numbers => {
     throw new Error(`Negative numbers are not allowed: ${negativeNumbers}`);
 };
 
-const extractNumbers = normalizedText => normalizedText !== ''
-    ? normalizedText.split(',').map(toInt)
-    : [];
+const identity = i => i;
+const compose = (a, b) => input => b(a(input));
+const pipe = (...fns) => fns.reduce(compose, identity);
 
-const discardInvalidNumbers = numbers => numbers.filter(lessThan(1000));
+const split = separator => text => text.split(separator);
+const map = mapper => array => array.map(mapper);
+const filter = predicate => array => array.filter(predicate);
+const reduce = (composingFn, neutralValue) => array => array.reduce(composingFn, neutralValue);
 
-const sumNumbers = numbers => numbers.reduce(sum, 0);
-
-module.exports = text => {
-  const separators = extractSeparators(text);
-
-  const rawText = extractText(text);
-
-  const normalizedText = normalizeText(separators, rawText);
-
-  const numbers = extractNumbers(normalizedText);
-
-  checkNegatives(numbers);
-
-  const validNumbers = discardInvalidNumbers(numbers);
-
-  return sumNumbers(validNumbers);
+const peek = fn => value => {
+  fn(value);
+  return value;
 };
+
+module.exports = pipe(
+    normalizeText,
+    split(','),
+    map(toInt),
+    peek(checkNegatives),
+    filter(lessThan(1000)),
+    reduce(sum, 0)
+);
