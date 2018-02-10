@@ -1,5 +1,12 @@
+const replaceAll = (search, replacement, text) => text.replace(new RegExp(search, "g"), replacement);
+const contains = (token, text) => text.indexOf(token) > -1;
+
+const toInt = text => parseInt(text, 10);
+const lessThan = b => a => a < b;
+const sum = (a, b) => a + b;
+
 const extractSeparators = text => {
-  if (text.indexOf("][") !== -1)
+  if (contains("][", text))
     return ["\n"].concat(text.substr(3, text.indexOf("\n") - 4).split("]["));
   if (text.startsWith("//["))
     return ["\n", text.substr(3, text.indexOf("]") - 3)];
@@ -18,26 +25,26 @@ const extractText = text => {
 
 const escapeSeparator = separator => separator
     .split('')
-    .map(char => ".()[]{}$^-/?*".indexOf(char) === -1 ? char : `\\${char}`)
+    .map(char => !contains(char, ".()[]{}$^-/?*") ? char : `\\${char}`)
     .join('');
 
 const normalizeText = (separators, normalizedText) => separators
     .map(escapeSeparator)
-    .reduce((result, separator) => result.replace(new RegExp(separator, "g"), ','), normalizedText);
+    .reduce((result, separator) => replaceAll(separator, ',', result), normalizedText);
 
 const checkNegatives = numbers => {
-  const negativeNumbers = numbers.filter(number => number < 0);
+  const negativeNumbers = numbers.filter(lessThan(0));
   if (negativeNumbers.length > 0)
     throw new Error(`Negative numbers are not allowed: ${negativeNumbers}`);
 };
 
 const extractNumbers = normalizedText => normalizedText !== ''
-    ? normalizedText.split(',').map(part => parseInt(part, 10))
+    ? normalizedText.split(',').map(toInt)
     : [];
 
-const discardInvalidNumbers = numbers => numbers.filter(number => number < 1000);
+const discardInvalidNumbers = numbers => numbers.filter(lessThan(1000));
 
-const sumNumbers = numbers => numbers.reduce((a, b) => a + b, 0);
+const sumNumbers = numbers => numbers.reduce(sum, 0);
 
 module.exports = text => {
   const separators = extractSeparators(text);
