@@ -1,6 +1,6 @@
 const {toInt, lessThan, sum} = require('./fp/numbers');
-const {contains, replaceAll, split, escapeRegex} = require('./fp/strings');
-const {pipe, spread} = require('./fp/fns');
+const {contains, startsWith, replaceAll, split, escapeRegex} = require('./fp/strings');
+const {pipe, spread, when} = require('./fp/fns');
 const {map, filter, reduce, peek} = require('./fp/arrays');
 
 const START_OF_HEADER_CHAR = "//";
@@ -8,18 +8,6 @@ const END_OF_HEADER_CHAR = "\n";
 const SEPARATOR_SEPARATOR = "][";
 
 const extractRawSeparators = text => text.substr(3, text.indexOf(END_OF_HEADER_CHAR) - 4);
-
-const extractSeparators = text => {
-  if (contains(SEPARATOR_SEPARATOR, text))
-    return ["\n"].concat(extractRawSeparators(text).split(SEPARATOR_SEPARATOR));
-  if (text.startsWith(START_OF_HEADER_CHAR))
-    return ["\n", extractRawSeparators(text)];
-  return ["\n"];
-};
-
-const extractText = text => text.startsWith(START_OF_HEADER_CHAR)
-    ? text.substr(text.indexOf(END_OF_HEADER_CHAR) + 1)
-    : text;
 
 const normalizeText = ([separators, text]) => separators
     .map(escapeRegex)
@@ -33,8 +21,13 @@ const checkNegatives = numbers => {
 
 module.exports = pipe(
     spread(
-        extractSeparators,
-        extractText
+        when(["\n"],
+            [contains(SEPARATOR_SEPARATOR), text => ["\n"].concat(extractRawSeparators(text).split(SEPARATOR_SEPARATOR))],
+            [startsWith(START_OF_HEADER_CHAR), text => ["\n", extractRawSeparators(text)]]
+        ),
+        when(text,
+            [startsWith(START_OF_HEADER_CHAR), text => text.substr(text.indexOf(END_OF_HEADER_CHAR) + 1)]
+        )
     ),
     normalizeText,
     split(','),

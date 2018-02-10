@@ -1,4 +1,5 @@
-const contains = (token, text) => text.indexOf(token) > -1;
+const contains = token => text => text.indexOf(token) > -1;
+const startsWith = prefix => text => text.startsWith(prefix);
 const replaceAll = (search, replacement, text) => text.replace(new RegExp(search, "g"), replacement);
 const split = separator => text => text.split(separator);
 const escapeRegex = regex => regex
@@ -6,4 +7,4 @@ const escapeRegex = regex => regex
     .map(char => !contains(char, ".()[]{}$^-/?*") ? char : `\\${char}`)
     .join('');
 
-module.exports = {contains, replaceAll, split, escapeRegex};
+module.exports = {contains, startsWith, replaceAll, split, escapeRegex};
