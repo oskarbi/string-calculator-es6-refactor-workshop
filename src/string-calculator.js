@@ -28,9 +28,9 @@ const escapeSeparator = separator => separator
     .map(char => !contains(char, ".()[]{}$^-/?*") ? char : `\\${char}`)
     .join('');
 
-const normalizeText = text => extractSeparators(text)
+const normalizeText = ([separators, text]) => separators
     .map(escapeSeparator)
-    .reduce((result, separator) => replaceAll(separator, ',', result), extractText(text));
+    .reduce((result, separator) => replaceAll(separator, ',', result), text);
 
 const checkNegatives = numbers => {
   const negativeNumbers = numbers.filter(lessThan(0));
@@ -52,7 +52,13 @@ const peek = fn => value => {
   return value;
 };
 
+const spread = (...fns) => value => fns.map(fn => fn(value));
+
 module.exports = pipe(
+    spread(
+        extractSeparators,
+        extractText
+    ),
     normalizeText,
     split(','),
     map(toInt),
