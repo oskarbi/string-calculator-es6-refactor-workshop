@@ -1,32 +1,35 @@
 const extractSeparators = text => {
-  let separators = ["\n"];
   if (text.indexOf("][") !== -1)
-    separators = ["\n"].concat(text.substr(3, text.indexOf("\n") - 4).split("]["));
-  else if (text.startsWith("//["))
-    separators = ["\n", text.substr(3, text.indexOf("]") - 3)];
-  else if (text.startsWith("//"))
-    separators = ["\n", text[2]];
-  return separators;
+    return ["\n"].concat(text.substr(3, text.indexOf("\n") - 4).split("]["));
+  if (text.startsWith("//["))
+    return ["\n", text.substr(3, text.indexOf("]") - 3)];
+  if (text.startsWith("//"))
+    return ["\n", text[2]];
+  return ["\n"];
 };
 
 const extractText = text => {
-  let normalizedText = text;
   if (text.startsWith("//["))
-    normalizedText = text.substr(text.indexOf("\n") + 1);
-  else if (text.startsWith("//"))
-    normalizedText = text.substr(4);
-  return normalizedText;
+    return text.substr(text.indexOf("\n") + 1);
+  if (text.startsWith("//"))
+    return text.substr(4);
+  return text;
+};
+
+const escapeSeparator = separator => {
+  let escapedSeparator = "";
+  for (let charInSeparator of separator.split('')) {
+    if (".()[]{}$^-/?*".indexOf(charInSeparator) === -1)
+      escapedSeparator += charInSeparator;
+    else
+      escapedSeparator += `\\${charInSeparator}`;
+  }
+  return escapedSeparator;
 };
 
 const normalizeText = (separators, normalizedText) => {
   for (let separator of separators) {
-    let escapedSeparator = "";
-    for (let charInSeparator of separator.split('')) {
-      if (".()[]{}$^-/?*".indexOf(charInSeparator) === -1)
-        escapedSeparator += charInSeparator;
-      else
-        escapedSeparator += `\\${charInSeparator}`;
-    }
+    const escapedSeparator = escapeSeparator(separator);
     normalizedText = normalizedText.replace(new RegExp(escapedSeparator, "g"), ',');
   }
   return normalizedText;
