@@ -16,56 +16,41 @@ const extractText = text => {
   return text;
 };
 
-const escapeSeparator = separator => {
-  let escapedSeparator = "";
-  for (let charInSeparator of separator.split('')) {
-    if (".()[]{}$^-/?*".indexOf(charInSeparator) === -1)
-      escapedSeparator += charInSeparator;
-    else
-      escapedSeparator += `\\${charInSeparator}`;
-  }
-  return escapedSeparator;
-};
+const escapeSeparator = separator => separator
+    .split('')
+    .map(char => ".()[]{}$^-/?*".indexOf(char) === -1 ? char : `\\${char}`)
+    .join('');
 
-const normalizeText = (separators, normalizedText) => {
-  for (let separator of separators) {
-    const escapedSeparator = escapeSeparator(separator);
-    normalizedText = normalizedText.replace(new RegExp(escapedSeparator, "g"), ',');
-  }
-  return normalizedText;
-};
+const normalizeText = (separators, normalizedText) => separators
+    .map(escapeSeparator)
+    .reduce((result, separator) => result.replace(new RegExp(separator, "g"), ','), normalizedText);
 
 const checkNegatives = numbers => {
-  const negativeNumbers = [];
-  for (let part of numbers) {
-    const number = parseInt(part, 10);
-    if (number < 0)
-      negativeNumbers.push(number);
-  }
+  const negativeNumbers = numbers.filter(number => number < 0);
   if (negativeNumbers.length > 0)
     throw new Error(`Negative numbers are not allowed: ${negativeNumbers}`);
 };
 
-const sumNumbers = numbers => {
-  let result = 0;
-  for (let part of numbers) {
-    const number = parseInt(part, 10);
-    if (number < 1000)
-      result += number;
-  }
-  return result;
-};
+const extractNumbers = normalizedText => normalizedText !== ''
+    ? normalizedText.split(',').map(part => parseInt(part, 10))
+    : [];
+
+const discardInvalidNumbers = numbers => numbers.filter(number => number < 1000);
+
+const sumNumbers = numbers => numbers.reduce((a, b) => a + b, 0);
 
 module.exports = text => {
-  let separators = extractSeparators(text);
+  const separators = extractSeparators(text);
 
   const rawText = extractText(text);
 
   const normalizedText = normalizeText(separators, rawText);
 
-  let numbers = normalizedText.split(',');
+  const numbers = extractNumbers(normalizedText);
 
   checkNegatives(numbers);
 
-  return sumNumbers(numbers);
+  const validNumbers = discardInvalidNumbers(numbers);
+
+  return sumNumbers(validNumbers);
 };
