@@ -4,6 +4,7 @@
  
 This is a NodeJS project. You should do the following steps to ensure that you will be able to follow the workshop:
 
+- NodeJS 6 or greater is required
 - Download dependencies with `npm install` or `yarn`
 - Run the tests with `npm run test` or `yarn test`
 
