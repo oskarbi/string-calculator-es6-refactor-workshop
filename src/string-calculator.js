@@ -25,9 +25,9 @@ module.exports = pipe(
             [contains(SEPARATOR_SEPARATOR), text => ["\n"].concat(extractRawSeparators(text).split(SEPARATOR_SEPARATOR))],
             [startsWith(START_OF_HEADER_CHAR), text => ["\n", extractRawSeparators(text)]]
         ),
-        when(text,
+        text => when(text,
             [startsWith(START_OF_HEADER_CHAR), text => text.substr(text.indexOf(END_OF_HEADER_CHAR) + 1)]
-        )
+        )(text)
     ),
     normalizeText,
     split(','),
