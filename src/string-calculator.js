@@ -19,6 +19,11 @@ const escapeSeparator = separator => {
   return separator.split('').map(escapeCharacter).join('');
 };
 
+const normalize = text => {
+  const payload = removeHeader(text);
+  return removeSeparators(text, payload);
+};
+
 const substituteSeparators = (normalizedText, separators) => {
   const escapedSeparators = separators.map(escapeSeparator);
   for (const separator of escapedSeparators) {
@@ -37,9 +42,10 @@ const removeSeparators = (text, separators) => {
   return substituteSeparators(normalizedText, separators);
 };
 
-const lessThan = (threshold) => (number) => (number < threshold);
+const lessThan = threshold => number => (number < threshold);
 const toInt = number => parseInt(number);
-const parseNumbers = normalizedPayload => normalizedPayload.split(',').map(toInt);
+const separateParts = normalizedPayload => normalizedPayload.split(',');
+const parseNumbers = numbers => numbers.map(toInt);
 const sum = (result, number) => result + number;
 
 const checkNegatives = (numbers) => {
@@ -48,10 +54,18 @@ const checkNegatives = (numbers) => {
     throw new Error(`Negative numbers are not allowed: ${negativeNumbers}`);
 };
 
+const compose = (fnA, fnB) => text => fnB(fnA(text));
+const identity = i => i;
+const pipe = (...fns) => fns.reduce(compose, identity);
+
 module.exports = text => {
-  const payload = removeHeader(text);
-  const normalizedPayload = removeSeparators(text, payload);
-  const numbers = parseNumbers(normalizedPayload);
+  const fn = pipe(
+    normalize,
+    separateParts,
+    parseNumbers);
+
+  const numbers = fn(text);
+
   checkNegatives(numbers);
   return numbers
     .filter(lessThan(1000))
