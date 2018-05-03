@@ -54,24 +54,26 @@ const checkNegatives = (numbers) => {
     throw new Error(`Negative numbers are not allowed: ${negativeNumbers}`);
 };
 
+const tap = fn => arg => {
+  fn(arg);
+  return arg;
+};
 const compose = (fnA, fnB) => text => fnB(fnA(text));
 const identity = i => i;
 const pipe = (...fns) => fns.reduce(compose, identity);
+
+const filter = predicate => array => array.filter(predicate);
+const reduce = (composingFn, neutralValue) => array => array.reduce(composingFn, neutralValue);
 
 module.exports = text => {
   const fn = pipe(
     normalize,
     separateParts,
     parseNumbers,
-    numbers => {
-      checkNegatives(numbers);
-      return numbers;
-    }
+    tap(checkNegatives),
+    filter(lessThan(1000)),
+    reduce(sum, 0)
   );
 
-  const numbers = fn(text);
-
-  return numbers
-    .filter(lessThan(1000))
-    .reduce(sum, 0);
+  return fn(text);
 };
