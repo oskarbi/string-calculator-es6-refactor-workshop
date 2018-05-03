@@ -10,16 +10,16 @@ module.exports = text => {
     return ["\n"];
   };
 
-  function escapeSeparator(separator) {
+  const escapeSeparator = separator => {
     let escapedSeparator = "";
-    for (let charInSeparator of separator.split('')) {
+    for (const charInSeparator of separator.split('')) {
       if (".()[]{}$^-/?*".indexOf(charInSeparator) === -1)
         escapedSeparator += charInSeparator;
       else
         escapedSeparator += `\\${charInSeparator}`;
     }
     return escapedSeparator;
-  }
+  };
 
   const separators = getSeparators(text);
 
