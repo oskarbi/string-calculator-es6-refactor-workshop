@@ -39,10 +39,17 @@ module.exports = text => {
     return substituteSeparators(normalizedText, separators);
   };
 
-  const checkNegativeNumbers = (normalizedText) => {
+  const getNumbers = normalizedPayload => {
+    const numbers = [];
+    for (const part of normalizedPayload.split(',')) {
+      numbers.push(parseInt(part));
+    }
+    return numbers;
+  };
+
+  const checkNegatives = (numbers) => {
     const negativeNumbers = [];
-    for (const part of normalizedText.split(',')) {
-      const number = parseInt(part, 10);
+    for (const number of numbers) {
       if (number < 0)
         negativeNumbers.push(number);
     }
@@ -51,20 +58,16 @@ module.exports = text => {
       throw new Error(`Negative numbers are not allowed: ${negativeNumbers}`);
   };
 
-  const sumValues = (normalizedText) => {
-    const values = normalizedText.split(',');
-    const sumator = (result, part) => {
-      part = parseInt(part);
-      return part < 1000 ? result + part : result;
+  const sumValues = (values) => {
+    const sumator = (result, number) => {
+      return number < 1000 ? result + number : result;
     };
-
     return values.reduce(sumator, 0);
   };
 
   const payload = removeHeader(text);
-  const normalizedText = removeSeparators(text, payload);
-
-  checkNegativeNumbers(normalizedText);
-
-  return sumValues(normalizedText);
+  const normalizedPayload = removeSeparators(text, payload);
+  const numbers = getNumbers(normalizedPayload);
+  checkNegatives(numbers);
+  return sumValues(numbers);
 };
