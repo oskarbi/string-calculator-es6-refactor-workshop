@@ -1,6 +1,6 @@
 module.exports = text => {
 
-  function getSeparators(text) {
+  const getSeparators = text => {
     if (text.indexOf("][") !== -1)
       return ["\n"].concat(text.substr(3, text.indexOf("\n") - 4).split("]["));
     if (text.startsWith("//["))
@@ -8,7 +8,7 @@ module.exports = text => {
     if (text.startsWith("//"))
       return ["\n", text[2]];
     return ["\n"];
-  }
+  };
 
   function escapeSeparator(separator) {
     let escapedSeparator = "";
