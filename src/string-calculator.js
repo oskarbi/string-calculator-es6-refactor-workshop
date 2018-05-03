@@ -62,11 +62,15 @@ module.exports = text => {
   const fn = pipe(
     normalize,
     separateParts,
-    parseNumbers);
+    parseNumbers,
+    numbers => {
+      checkNegatives(numbers);
+      return numbers;
+    }
+  );
 
   const numbers = fn(text);
 
-  checkNegatives(numbers);
   return numbers
     .filter(lessThan(1000))
     .reduce(sum, 0);
