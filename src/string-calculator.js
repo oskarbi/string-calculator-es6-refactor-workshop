@@ -52,14 +52,13 @@ module.exports = text => {
   };
 
   const sumValues = (normalizedText) => {
-    let result = 0;
-    for (const part of normalizedText.split(',')) {
-      const number = parseInt(part, 10);
-      if (number < 1000)
-        result += number;
-    }
+    const values = normalizedText.split(',');
+    const sumator = (result, part) => {
+      part = parseInt(part);
+      return part < 1000 ? result + part : result;
+    };
 
-    return result;
+    return values.reduce(sumator, 0);
   };
 
   const payload = removeHeader(text);
