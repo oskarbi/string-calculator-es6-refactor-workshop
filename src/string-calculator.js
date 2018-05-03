@@ -9,20 +9,20 @@ const removeHeader = text => {
 };
 
 const escapeSeparator = separator => {
-  let escapedSeparator = "";
-  for (const charInSeparator of separator.split('')) {
+  const escapeCharacter = charInSeparator => {
     if (".()[]{}$^-/?*".indexOf(charInSeparator) === -1)
-      escapedSeparator += charInSeparator;
+      return charInSeparator;
     else
-      escapedSeparator += `\\${charInSeparator}`;
-  }
-  return escapedSeparator;
+      return `\\${charInSeparator}`;
+  };
+
+  return separator.split('').map(escapeCharacter).join('');
 };
 
 const substituteSeparators = (normalizedText, separators) => {
-  for (let separator of separators) {
-    const escapedSeparator = escapeSeparator(separator);
-    normalizedText = normalizedText.replace(new RegExp(escapedSeparator, "g"), ',');
+  const escapedSeparators = separators.map(escapeSeparator);
+  for (const separator of escapedSeparators) {
+    normalizedText = normalizedText.replace(new RegExp(separator, "g"), ',');
   }
   return normalizedText;
 };
@@ -38,20 +38,12 @@ const removeSeparators = (text, separators) => {
 };
 
 const parseNumbers = normalizedPayload => {
-  const numbers = [];
-  for (const part of normalizedPayload.split(',')) {
-    numbers.push(parseInt(part));
-  }
-  return numbers;
+  return normalizedPayload.split(',').map(number => parseInt(number));
 };
 
 const checkNegatives = (numbers) => {
-  const negativeNumbers = [];
-  for (const number of numbers) {
-    if (number < 0)
-      negativeNumbers.push(number);
-  }
-
+  const isNegative = number => (number < 0);
+  const negativeNumbers = numbers.filter(isNegative);
   if (negativeNumbers.length > 0)
     throw new Error(`Negative numbers are not allowed: ${negativeNumbers}`);
 };
