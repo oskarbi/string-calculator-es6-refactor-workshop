@@ -37,7 +37,7 @@ const removeSeparators = (text, separators) => {
   return substituteSeparators(normalizedText, separators);
 };
 
-const getNumbers = normalizedPayload => {
+const parseNumbers = normalizedPayload => {
   const numbers = [];
   for (const part of normalizedPayload.split(',')) {
     numbers.push(parseInt(part));
@@ -57,16 +57,15 @@ const checkNegatives = (numbers) => {
 };
 
 const sumValues = (values) => {
-  const sumator = (result, number) => {
-    return number < 1000 ? result + number : result;
-  };
-  return values.reduce(sumator, 0);
+  const isLessThan1000 = (number) => (number < 1000);
+  const sum = (result, number) => result + number;
+  return values.filter(isLessThan1000).reduce(sum, 0);
 };
 
 module.exports = text => {
   const payload = removeHeader(text);
   const normalizedPayload = removeSeparators(text, payload);
-  const numbers = getNumbers(normalizedPayload);
+  const numbers = parseNumbers(normalizedPayload);
   checkNegatives(numbers);
   return sumValues(numbers);
 };
