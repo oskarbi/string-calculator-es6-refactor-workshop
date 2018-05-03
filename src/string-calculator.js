@@ -10,6 +10,17 @@ module.exports = text => {
     return ["\n"];
   }
 
+  function escapeSeparator(separator) {
+    let escapedSeparator = "";
+    for (let charInSeparator of separator.split('')) {
+      if (".()[]{}$^-/?*".indexOf(charInSeparator) === -1)
+        escapedSeparator += charInSeparator;
+      else
+        escapedSeparator += `\\${charInSeparator}`;
+    }
+    return escapedSeparator;
+  }
+
   const separators = getSeparators(text);
 
   let normalizedText = text;
@@ -19,13 +30,7 @@ module.exports = text => {
     normalizedText = text.substr(4);
 
   for (let separator of separators) {
-    let escapedSeparator = "";
-    for (let charInSeparator of separator.split('')) {
-      if (".()[]{}$^-/?*".indexOf(charInSeparator) === -1)
-        escapedSeparator += charInSeparator;
-      else
-        escapedSeparator += `\\${charInSeparator}`;
-    }
+    const escapedSeparator = escapeSeparator(separator);
     normalizedText = normalizedText.replace(new RegExp(escapedSeparator, "g"), ',');
   }
 
