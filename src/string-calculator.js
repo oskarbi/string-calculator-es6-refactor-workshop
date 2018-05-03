@@ -1,11 +1,16 @@
 module.exports = text => {
-  let separators = ["\n"];
-  if (text.indexOf("][") !== -1)
-    separators = ["\n"].concat(text.substr(3, text.indexOf("\n") - 4).split("]["));
-  else if (text.startsWith("//["))
-    separators = ["\n", text.substr(3, text.indexOf("]") - 3)];
-  else if (text.startsWith("//"))
-    separators = ["\n", text[2]];
+
+  function getSeparators(text) {
+    if (text.indexOf("][") !== -1)
+      return ["\n"].concat(text.substr(3, text.indexOf("\n") - 4).split("]["));
+    if (text.startsWith("//["))
+      return ["\n", text.substr(3, text.indexOf("]") - 3)];
+    if (text.startsWith("//"))
+      return ["\n", text[2]];
+    return ["\n"];
+  }
+
+  const separators = getSeparators(text);
 
   let normalizedText = text;
   if (text.startsWith("//["))
