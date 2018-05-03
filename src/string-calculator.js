@@ -37,21 +37,17 @@ const removeSeparators = (text, separators) => {
   return substituteSeparators(normalizedText, separators);
 };
 
-const parseNumbers = normalizedPayload => {
-  return normalizedPayload.split(',').map(number => parseInt(number));
-};
+const lessThanZero = number => (number < 0);
+const lessThanThousand = (number) => (number < 1000);
+
+const toInt = number => parseInt(number);
+const parseNumbers = normalizedPayload => normalizedPayload.split(',').map(toInt);
+const sum = (result, number) => result + number;
 
 const checkNegatives = (numbers) => {
-  const isNegative = number => (number < 0);
-  const negativeNumbers = numbers.filter(isNegative);
+  const negativeNumbers = numbers.filter(lessThanZero);
   if (negativeNumbers.length > 0)
     throw new Error(`Negative numbers are not allowed: ${negativeNumbers}`);
-};
-
-const sumValues = (values) => {
-  const isLessThan1000 = (number) => (number < 1000);
-  const sum = (result, number) => result + number;
-  return values.filter(isLessThan1000).reduce(sum, 0);
 };
 
 module.exports = text => {
@@ -59,5 +55,7 @@ module.exports = text => {
   const normalizedPayload = removeSeparators(text, payload);
   const numbers = parseNumbers(normalizedPayload);
   checkNegatives(numbers);
-  return sumValues(numbers);
+  return numbers
+    .filter(lessThanThousand)
+    .reduce(sum, 0);
 };
